@@ -17,6 +17,7 @@ buildscript {
     dependencies {
         classpath("net.fabricmc:fabric-loom:0.8-SNAPSHOT")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
+        classpath("gradle.plugin.com.matthewprenger:CurseGradle:1.4.0")
     }
 }
 
@@ -34,13 +35,15 @@ group = "io.github.marcus8448.mods"
 
 subprojects {
     apply(plugin = "java")
-    apply(plugin = "org.cadixdev.licenser")
     apply(plugin = "fabric-loom")
+    apply(plugin = "org.cadixdev.licenser")
 
     val modId = project.property("mod.id").toString()
     val modName = project.property("mod.name").toString()
     val modVersion = project.property("mod.version").toString()
     val modDescription = project.property("mod.description").toString()
+
+    val curseforgeId = project.property("curseforge.project_id") ?: ""
 
     val lbaEnabled = project.property("lba.enabled").toString() == "true"
     val modmenuEnabled = project.property("modmenu.enabled").toString() == "true"
@@ -48,7 +51,7 @@ subprojects {
     val wthitEnabled = project.property("wthit.enabled").toString() == "true"
     val fabricModules = project.property("fabric.modules").toString().split(",".toRegex())
     val fabricRuntimeModules = project.property("fabric.runtime.modules").toString().split(",".toRegex())
-    val runtimeOptionalEnabled = project.property("optional_dependencies.enabled") == "true"
+    val runtimeOptionalEnabled = (project.property("optional_dependencies.enabled") ?: "false") == "true"
 
     repositories {
         mavenLocal()
@@ -261,6 +264,41 @@ subprojects {
                     "Maven-Artifact" to "${rootProject.group}:${modName}:${project.version}"
                 )
             )
+        }
+    }
+
+    if (System.getenv("CURSEFORGE_API_KEY") != null) {
+        apply(plugin = "com.matthewprenger.cursegradle")
+
+        project.extensions.getByType(com.matthewprenger.cursegradle.CurseExtension::class).apply {
+            apiKey = System.getenv("CURSEFORGE_API_KEY")
+            project(closureOf<com.matthewprenger.cursegradle.CurseProject> {
+                id = curseforgeId
+                releaseType = if (project.properties.containsKey("curseforge.release_type")) {
+                    project.property("curseforge.release_type")
+                } else {
+                    "release"
+                }
+                changelog = ""
+
+                addGameVersion("Fabric")
+                addGameVersion("Java 16")
+                addGameVersion(minecraftVersion)
+
+                relations(closureOf<com.matthewprenger.cursegradle.CurseRelation> {
+                    if (fabricModules.isNotEmpty()) requiredDependency("fabric-api")
+                    if (lbaEnabled) embeddedLibrary("libblockattributes")
+                    if (reiEnabled) optionalDependency("roughly-enough-items")
+                    if (modmenuEnabled) optionalDependency("modmenu")
+                    if (wthitEnabled) optionalDependency("wthit")
+                })
+                mainArtifact(file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar"))
+
+                options(closureOf<com.matthewprenger.cursegradle.Options> {
+                    forgeGradleIntegration = false
+                    javaVersionAutoDetect = false
+                })
+            })
         }
     }
 }
