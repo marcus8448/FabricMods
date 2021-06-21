@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "io.github.marcus8448.mods.cyg.mixin",
+  "package": "io.github.marcus8448.mods.personalcommands.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "LocateBiomeCommandMixin",

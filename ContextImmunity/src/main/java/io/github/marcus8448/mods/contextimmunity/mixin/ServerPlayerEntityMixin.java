@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.marcus8448.mods.csimmunity.mixin;
+package io.github.marcus8448.mods.contextimmunity.mixin;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -32,9 +32,9 @@ public abstract class ServerPlayerEntityMixin {
     @Unique
     private DamageSource source;
 
-    @ModifyConstant(method = "damage", constant = @Constant(expandZeroConditions = Constant.Condition.LESS_THAN_OR_EQUAL_TO_ZERO))
+    @ModifyConstant(method = "damage", constant = @Constant(expandZeroConditions = Constant.Condition.GREATER_THAN_ZERO))
     private int ignoreInvulnerability(int i) {
-        if (source.bypassesArmor()) return 1000000;
+        if (source.bypassesArmor() || source.isFire()) return 100000000;
         return i;
     }
 

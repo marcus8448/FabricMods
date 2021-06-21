@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.marcus8448.mods.cyg;
+package io.github.marcus8448.mods.personalcommands;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -23,7 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public class ChangeYourGamemode implements ModInitializer {
+public class PersonalCommands implements ModInitializer {
     @Override
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
@@ -31,11 +31,11 @@ public class ChangeYourGamemode implements ModInitializer {
             dispatcher.register(CommandManager.literal("clearp").executes(context -> {
                 ServerPlayerEntity player = context.getSource().getPlayer();
                 if (player != null) {
-                    player.inventory.remove(stack -> true, -1, player.playerScreenHandler.method_29281());
-                    player.inventory.setCursorStack(ItemStack.EMPTY);
+                    player.getInventory().remove(stack -> true, -1, player.playerScreenHandler.getCraftingInput());
+                    player.playerScreenHandler.setCursorStack(ItemStack.EMPTY);
+                    player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
                     player.currentScreenHandler.sendContentUpdates();
-                    player.playerScreenHandler.onContentChanged(player.inventory);
-                    player.updateCursorStack();
+                    player.playerScreenHandler.onContentChanged(player.getInventory());
                 }
                 return 1;
             }));

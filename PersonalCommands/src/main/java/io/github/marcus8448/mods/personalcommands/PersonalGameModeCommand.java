@@ -20,7 +20,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package io.github.marcus8448.mods.cyg;
+package io.github.marcus8448.mods.personalcommands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -43,7 +43,7 @@ public class PersonalGameModeCommand {
         GameMode[] var2 = GameMode.values();
 
         for (GameMode gameMode : var2) {
-            if (gameMode != GameMode.NOT_SET) {
+            if (gameMode != GameMode.DEFAULT) {
                 literalArgumentBuilder.then(CommandManager.literal(gameMode.getName()).executes(commandContext -> execute(commandContext, Collections.singleton(commandContext.getSource().getPlayer()), gameMode)));
                 literalArgumentBuilder.then(CommandManager.literal(String.valueOf(gameMode.getId())).executes(commandContext -> execute(commandContext, Collections.singleton(commandContext.getSource().getPlayer()), gameMode)));
             }
@@ -71,7 +71,7 @@ public class PersonalGameModeCommand {
 
         for (ServerPlayerEntity serverPlayerEntity : targets) {
             if (serverPlayerEntity.interactionManager.getGameMode() != gameMode) {
-                serverPlayerEntity.setGameMode(gameMode);
+                serverPlayerEntity.changeGameMode(gameMode);
                 setGameMode(context.getSource(), serverPlayerEntity, gameMode);
                 ++i;
             }

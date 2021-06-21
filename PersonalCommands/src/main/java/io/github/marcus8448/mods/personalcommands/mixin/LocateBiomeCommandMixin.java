@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package io.github.marcus8448.mods.cyg.mixin;
+package io.github.marcus8448.mods.personalcommands.mixin;
 
-import net.minecraft.server.command.LocateCommand;
+import net.minecraft.server.command.LocateBiomeCommand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(LocateCommand.class)
-public abstract class LocateCommandMixin {
-    @ModifyConstant(method = "method_13448", constant = @Constant(intValue = 2)) //synthetic
+@Mixin(LocateBiomeCommand.class)
+public abstract class LocateBiomeCommandMixin {
+    @ModifyConstant(method = "method_24494", constant = @Constant(intValue = 2)) //synthetic
     private static int allowLocate(int in) {
         return 0;
     }

@@ -26,9 +26,9 @@
     "issues": "https://github.com/marcus8448/FabricMods/issues/"
   },
   "license": "LGPL-3.0-only",
-  "icon": "assets/${modid}/icon.png",
+  "icon": "assets/${mod_id}/icon.png",
   "mixins": [
-    "${modid}.mixins.json"
+    "${mod_id}.mixins.json"
   ],
   "environment": "*",
   "depends": {
