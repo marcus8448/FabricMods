@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "io.github.marcus8448.mods.cyg.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "LocateBiomeCommandMixin",
+    "LocateCommandMixin"
+  ],
+  "minVersion": "0.8.0",
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

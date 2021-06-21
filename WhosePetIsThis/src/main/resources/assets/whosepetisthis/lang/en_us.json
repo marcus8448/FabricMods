@@ -1,0 +1,5 @@
+{
+  "command.whosepetisthis.pet_owner": "Pet owner: %s.",
+  "command.whosepetisthis.no_owner": "This pet is not tamed.",
+  "command.whosepetisthis.not_tameable": "Selected entity is not tamable!"
+}

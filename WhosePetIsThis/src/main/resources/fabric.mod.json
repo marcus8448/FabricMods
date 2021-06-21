@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "icon": "assets/${mod_id}/icon.png",
+  "description": "mod_description",
+  "license": "LGPL-3.0-only",
+  "contact": {
+    "homepage": "https://github.com/marcus8448/",
+    "sources": "https://github.com/marcus8448/FabricMods/",
+    "issues": "https://github.com/marcus8448/FabricMods/issues/"
+  },
+  "authors": [
+    {
+      "name": "marcus8448",
+      "contact": {
+        "homepage": "https://github.com/marcus8448/"
+      }
+    }
+  ],
+  "contributors": [
+    {
+      "name": "marcus8448",
+      "contact": {
+        "homepage": "https://github.com/marcus8448/"
+      }
+    }
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.marcus8448.mods.whosepetisthis.WhosePetIsThis"
+    ]
+  },
+  "depends": {
+    "minecraft": ">=1.17",
+    "fabricloader": ">=0.11.3"
+  },
+  "suggests": {
+  }
+}
