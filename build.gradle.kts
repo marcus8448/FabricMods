@@ -39,6 +39,8 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "fabric-loom")
     apply(plugin = "org.cadixdev.licenser")
+    apply(plugin = "com.modrinth.minotaur")
+    apply(plugin = "com.matthewprenger.cursegradle")
 
     val modId = project.property("mod.id").toString()
     val modName = project.property("mod.name").toString()
@@ -279,8 +281,6 @@ subprojects {
     }
 
     if (System.getenv("CURSEFORGE_API_KEY") != null && curseforgeId.isNotBlank()) {
-        apply(plugin = "com.matthewprenger.cursegradle")
-
         project.extensions.getByType(com.matthewprenger.cursegradle.CurseExtension::class).apply {
             apiKey = System.getenv("CURSEFORGE_API_KEY")
             project(closureOf<com.matthewprenger.cursegradle.CurseProject> {
@@ -314,17 +314,28 @@ subprojects {
         }
     }
 
-    if (System.getenv("MODRINTH_API_KEY") != null && modrinthId.isNotBlank()) {
-        apply(plugin = "com.modrinth.minotaur")
+    tasks.create<com.modrinth.minotaur.TaskModrinthUpload>("publishModrinth") {
+        onlyIf {
+            System.getenv("MODRINTH_API_KEY") != null && modrinthId.isNotBlank()
+        }
+        token = System.getenv("MODRINTH_API_KEY")
+        projectId = modrinthId
+        versionNumber = modVersion
+        uploadFile =
+            file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar")
+        addGameVersion(minecraftVersion)
+        addLoader("fabric")
+    }
+}
 
-        tasks.create<com.modrinth.minotaur.TaskModrinthUpload>("publishModrinth") {
-            token = System.getenv("MODRINTH_API_KEY")
-            projectId = modrinthId
-            versionNumber = modVersion
-            uploadFile =
-                file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar")
-            addGameVersion(minecraftVersion)
-            addLoader("fabric")
+tasks.create("publishAll") {
+    rootProject.allprojects.forEach { project ->
+        project.tasks.forEach { task ->
+            println(task.name)
+            if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
+                println(task.name)
+                this.dependsOn(":${project.name}:${task.name}")
+            }
         }
     }
 }

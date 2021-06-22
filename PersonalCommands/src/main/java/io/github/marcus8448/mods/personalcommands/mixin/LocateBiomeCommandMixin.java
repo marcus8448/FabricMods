@@ -18,13 +18,15 @@
 package io.github.marcus8448.mods.personalcommands.mixin;
 
 import net.minecraft.server.command.LocateBiomeCommand;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(LocateBiomeCommand.class)
 public abstract class LocateBiomeCommandMixin {
-    @ModifyConstant(method = "method_24494", constant = @Constant(intValue = 2)) //synthetic
+    @Dynamic
+    @ModifyConstant(method = "method_24494", constant = @Constant(intValue = 2))
     private static int allowLocate(int in) {
         return 0;
     }

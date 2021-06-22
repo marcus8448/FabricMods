@@ -19,30 +19,31 @@ package io.github.marcus8448.mods.nolancheats.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.OpenToLanScreen;
 import net.minecraft.client.gui.widget.CyclingButtonWidget;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.Text;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.GameMode;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(OpenToLanScreen.class)
 @Environment(EnvType.CLIENT)
 public class OpenToLanScreenMixin {
-    @Shadow
-    @Final
-    private static Text ALLOW_COMMANDS_TEXT;
+    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/CyclingButtonWidget$Builder;build(IIIILnet/minecraft/text/Text;Lnet/minecraft/client/gui/widget/CyclingButtonWidget$UpdateCallback;)Lnet/minecraft/client/gui/widget/CyclingButtonWidget;"))
+    private <T> CyclingButtonWidget<T> createWidget(CyclingButtonWidget.Builder<T> builder, int x, int y, int width, int height, Text optionText, CyclingButtonWidget.UpdateCallback<T> callback) {
+        if (MinecraftClient.getInstance().getServer().getForcedGameMode() != GameMode.CREATIVE)
+            return builder.build(-100000, 100000, 1, 1, optionText, (a, b) -> {});
+        return builder.build(x, y, width, height, optionText, callback);
+    }
 
-    @Redirect(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/OpenToLanScreen;addDrawableChild(Lnet/minecraft/client/gui/Element;)Lnet/minecraft/client/gui/Element;"))
-    private <T extends Element & Drawable & Selectable> T createWidget(OpenToLanScreen openToLanScreen, T drawableElement) {
-        if (!(drawableElement instanceof CyclingButtonWidget<?> widget) || widget.getMessage() != ALLOW_COMMANDS_TEXT) {
-            return openToLanScreen.addDrawableChild(drawableElement);
-        }
-        return drawableElement;
+    @Dynamic
+    @Redirect(method = "method_19851", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/integrated/IntegratedServer;openToLan(Lnet/minecraft/world/GameMode;ZI)Z"))
+    private boolean noCheatsForceGamemode(IntegratedServer server, @Nullable GameMode gameMode, boolean cheatsAllowed, int port) {
+        return server.openToLan(server.getDefaultGameMode() != GameMode.CREATIVE ? server.getDefaultGameMode() : gameMode, server.getDefaultGameMode() == GameMode.CREATIVE && cheatsAllowed, port);
     }
 }
