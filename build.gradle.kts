@@ -314,26 +314,23 @@ subprojects {
         }
     }
 
-    tasks.create<com.modrinth.minotaur.TaskModrinthUpload>("publishModrinth") {
-        onlyIf {
-            System.getenv("MODRINTH_API_KEY") != null && modrinthId.isNotBlank()
+    if (System.getenv("MODRINTH_API_KEY") != null && modrinthId.isNotBlank()) {
+        tasks.create<com.modrinth.minotaur.TaskModrinthUpload>("publishModrinth") {
+            token = System.getenv("MODRINTH_API_KEY")
+            projectId = modrinthId
+            versionNumber = modVersion
+            uploadFile =
+                file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar")
+            addGameVersion(minecraftVersion)
+            addLoader("fabric")
         }
-        token = System.getenv("MODRINTH_API_KEY")
-        projectId = modrinthId
-        versionNumber = modVersion
-        uploadFile =
-            file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar")
-        addGameVersion(minecraftVersion)
-        addLoader("fabric")
     }
 }
 
 tasks.create("publishAll") {
     rootProject.allprojects.forEach { project ->
         project.tasks.forEach { task ->
-            println(task.name)
             if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
-                println(task.name)
                 this.dependsOn(":${project.name}:${task.name}")
             }
         }

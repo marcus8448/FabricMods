@@ -1,0 +1,129 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "walkways:block/base",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "walkways:block/base",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "walkways:block/base",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "walkways:block/base",
+        "y": 270,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "left": false
+      },
+      "apply": {
+        "model": "walkways:block/left",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "left": false
+      },
+      "apply": {
+        "model": "walkways:block/left",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "left": false
+      },
+      "apply": {
+        "model": "walkways:block/left",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "left": false
+      },
+      "apply": {
+        "model": "walkways:block/left",
+        "y": 270,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "right": false
+      },
+      "apply": {
+        "model": "walkways:block/right",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "right": false
+      },
+      "apply": {
+        "model": "walkways:block/right",
+        "y": 90,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "right": false
+      },
+      "apply": {
+        "model": "walkways:block/right",
+        "y": 180,
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "right": false
+      },
+      "apply": {
+        "model": "walkways:block/right",
+        "y": 270,
+        "uvlock": true
+      }
+    }
+  ]
+}
