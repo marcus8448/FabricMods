@@ -2,11 +2,8 @@
   "required": true,
   "minVersion": "0.8",
   "package": "io.github.marcus8448.mods.snowy.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "BiomeAccessor",
-    "ChunkDataS2CPacketMixin",
-    "FreezeTopLayerFeatureMixin",
     "ServerWorldMixin"
   ],
   "injectors": {

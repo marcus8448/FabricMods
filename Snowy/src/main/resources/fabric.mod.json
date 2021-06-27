@@ -27,7 +27,6 @@
   },
   "license": "LGPL-3.0-only",
   "icon": "assets/${mod_id}/icon.png",
-  "accessWidener": "${mod_id}.accesswidener",
   "mixins": [
     "${mod_id}.mixins.json"
   ],

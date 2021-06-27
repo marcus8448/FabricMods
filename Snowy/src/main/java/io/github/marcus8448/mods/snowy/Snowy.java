@@ -17,45 +17,25 @@
 
 package io.github.marcus8448.mods.snowy;
 
-import io.github.marcus8448.mods.snowy.mixin.BiomeAccessor;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.BuiltinRegistries;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BuiltinBiomes;
-
-import java.util.LinkedList;
-import java.util.List;
+import net.minecraft.world.gen.GenerationStep;
+import net.minecraft.world.gen.feature.ConfiguredFeatures;
 
 public class Snowy implements ModInitializer {
-    public static int addition = Integer.MAX_VALUE;
-    public static GameRules.Key<GameRules.BooleanRule> snowAlways = null;
-
+    public static final SnowyConfig CONFIG = new SnowyConfig();
     @Override
     public void onInitialize() {
-        List<Biome> biomes = new LinkedList<>();
-        for (Biome biome : BuiltinRegistries.BIOME) {
-            biomes.add(biome);
-        }
-        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-
-        for (Biome biome : biomes) {
-            int id = BuiltinRegistries.BIOME.getRawId(biome);
-            min = Math.min(id, min);
-            max = Math.max(id, max);
-        }
-
-        addition = (max - min) + 1;
-        boolean alter;
-        for (Biome biome : biomes) {
-//			GenerationStep.Feature.TOP_LAYER_MODIFICATION, ConfiguredFeatures.FREEZE_TOP_LAYER
-            alter = biome.getPrecipitation() != Biome.Precipitation.NONE;
-            BuiltinBiomes.register(BuiltinRegistries.BIOME.getRawId(biome) + addition, RegistryKey.of(Registry.BIOME_KEY, new Identifier(BuiltinRegistries.BIOME.getId(biome).toString() + "_snowymod")), new Biome.Builder().category(biome.getCategory()).depth(biome.getDepth()).downfall(biome.getDownfall()).effects(biome.getEffects()).generationSettings(biome.getGenerationSettings()).precipitation(alter ? Biome.Precipitation.SNOW : Biome.Precipitation.NONE).scale(biome.getScale()).spawnSettings(biome.getSpawnSettings()).temperature(alter ? -1.0f : biome.getTemperature()).temperatureModifier(((BiomeAccessor) biome).getWeather().temperatureModifier).build());
-        }
-        snowAlways = GameRuleRegistry.register("snowAlways", GameRules.Category.MISC, GameRules.BooleanRule.create(false, (minecraftServer, booleanRule) -> {}));
+        BiomeModifications.create(new Identifier("snowy", "add_freeze_top")).add(ModificationPhase.ADDITIONS, biomeSelectionContext -> (CONFIG.data.nonOverworldBiomes || BiomeSelectors.foundInOverworld().test(biomeSelectionContext)) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getPrecipitation() != Biome.Precipitation.NONE) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getDownfall() > 0.0f) && !biomeSelectionContext.hasBuiltInFeature(ConfiguredFeatures.FREEZE_TOP_LAYER), context -> context.getGenerationSettings().addBuiltInFeature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, ConfiguredFeatures.FREEZE_TOP_LAYER));
+        BiomeModifications.create(new Identifier("snowy", "snow_in_overworld")).add(ModificationPhase.POST_PROCESSING, biomeSelectionContext -> (CONFIG.data.nonOverworldBiomes || BiomeSelectors.foundInOverworld().test(biomeSelectionContext)) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getPrecipitation() != Biome.Precipitation.NONE) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getDownfall() > 0.0f), context -> {
+            context.getWeather().setPrecipitation(Biome.Precipitation.SNOW);
+            context.getWeather().setTemperature(0.0f);
+            if (CONFIG.data.temperatureNoise)
+                context.getWeather().setTemperatureModifier(Biome.TemperatureModifier.FROZEN);
+        });
     }
 }
