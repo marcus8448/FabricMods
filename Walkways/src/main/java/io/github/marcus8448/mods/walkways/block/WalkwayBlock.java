@@ -94,8 +94,8 @@ public class WalkwayBlock extends Block {
             shape = VoxelShapes.combine(shape, switch (state.get(FACING)) {
                 case NORTH -> LEFT;
                 case SOUTH -> RIGHT;
-                case WEST -> LEFT_90;
-                case EAST -> RIGHT_90;
+                case WEST -> RIGHT_90;
+                case EAST -> LEFT_90;
                 default -> throw new IllegalStateException("Invalid facing!");
             }, BooleanBiFunction.OR);
         }
@@ -103,8 +103,8 @@ public class WalkwayBlock extends Block {
             shape = VoxelShapes.combine(shape, switch (state.get(FACING)) {
                 case NORTH -> RIGHT;
                 case SOUTH -> LEFT;
-                case WEST -> RIGHT_90;
-                case EAST -> LEFT_90;
+                case WEST -> LEFT_90;
+                case EAST -> RIGHT_90;
                 default -> throw new IllegalStateException("Invalid facing!");
             }, BooleanBiFunction.OR);
         }
