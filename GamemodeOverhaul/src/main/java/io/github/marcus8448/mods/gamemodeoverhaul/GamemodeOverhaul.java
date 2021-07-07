@@ -102,7 +102,7 @@ public class GamemodeOverhaul implements ModInitializer {
 
     private static int changeDefaultMode(ServerCommandSource source, GameMode mode) {
         int i = 0;
-        MinecraftServer server = source.getMinecraftServer();
+        MinecraftServer server = source.getServer();
         server.setDefaultGameMode(mode);
         if (server.getForcedGameMode() == mode) {
 

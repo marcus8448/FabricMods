@@ -26,6 +26,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.TranslatableText;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class WhosePetIsThis implements ModInitializer {
@@ -36,9 +37,13 @@ public class WhosePetIsThis implements ModInitializer {
                 Entity entity = EntityArgumentType.getEntity(context, "entity");
                 if (entity instanceof TameableEntity) {
                     UUID uuid = ((TameableEntity) entity).getOwnerUuid();
-                    GameProfile profile = context.getSource().getMinecraftServer().getUserCache().getByUuid(uuid);
-                    if (profile != null) {
-                        context.getSource().sendFeedback(new TranslatableText("command.whosepetisthis.pet_owner", profile.getName()), false);
+                    if (uuid != null) {
+                        Optional<GameProfile> profile = context.getSource().getServer().getUserCache().getByUuid(uuid);
+                        if (profile.isPresent()) {
+                            context.getSource().sendFeedback(new TranslatableText("command.whosepetisthis.pet_owner", profile.get().getName()), false);
+                        } else {
+                            context.getSource().sendFeedback(new TranslatableText("command.whosepetisthis.pet_owner", uuid.toString()), false);
+                        }
                     } else {
                         context.getSource().sendFeedback(new TranslatableText("command.whosepetisthis.no_owner"), false);
                     }
