@@ -22,16 +22,16 @@ buildscript {
     }
 }
 
-val minecraftVersion = rootProject.property("minecraft.version").toString()
-val yarnBuild = rootProject.property("yarn.build").toString()
-val loaderVersion = rootProject.property("loader.version").toString()
+val minecraftVersion = project.property("minecraft.version").toString()
+val yarnBuild = project.property("yarn.build").toString()
+val loaderVersion = project.property("loader.version").toString()
 
-val fabricVersion = rootProject.property("fabric.version").toString()
-val modmenuVersion = rootProject.property("modmenu.version").toString()
-val clothConfigVersion = rootProject.property("cloth_config.version").toString()
-val lbaVersion = rootProject.property("lba.version").toString()
-val reiVersion = rootProject.property("rei.version").toString()
-val wthitVersion = rootProject.property("wthit.version").toString()
+val fabricVersion = project.property("fabric.version").toString()
+val modmenuVersion = project.property("modmenu.version").toString()
+val clothConfigVersion = project.property("cloth_config.version").toString()
+val lbaVersion = project.property("lba.version").toString()
+val reiVersion = project.property("rei.version").toString()
+val wthitVersion = project.property("wthit.version").toString()
 
 group = "io.github.marcus8448.mods"
 
@@ -58,6 +58,64 @@ subprojects {
     val fabricModules = project.property("fabric.modules").toString().split(",".toRegex())
     val fabricRuntimeModules = project.property("fabric.runtime.modules").toString().split(",".toRegex())
     val runtimeOptionalEnabled = (project.property("optional_dependencies.enabled") ?: "false") == "true"
+
+    fun DependencyHandlerScope.minecraft(dependencyNotation: Any) {
+        this.add("minecraft", this.create(dependencyNotation))
+    }
+
+    fun DependencyHandlerScope.mappings(dependencyNotation: Any) {
+        this.add("mappings", this.create(dependencyNotation))
+    }
+
+    fun DependencyHandlerScope.modImplementation(dependencyNotation: Any) {
+        this.add("modImplementation", this.create(dependencyNotation))
+    }
+
+    fun DependencyHandlerScope.modIncludedApi(dependencyNotation: Any, configuration: Action<ModuleDependency>) {
+        configuration.execute(
+            this.add(
+                "modApi",
+                this.create(dependencyNotation)
+            ) as ModuleDependency
+        )
+        configuration.execute(
+            this.add(
+                "include",
+                this.create(dependencyNotation)
+            ) as ModuleDependency
+        )
+    }
+
+    fun DependencyHandlerScope.modRuntime(dependencyNotation: Any) {
+        this.add("modRuntime", this.create(dependencyNotation))
+    }
+
+    fun DependencyHandlerScope.fabricApiImplementation(moduleName: String) {
+        modImplementation(
+            "net.fabricmc.fabric-api:$moduleName:${
+                project.extensions.getByType(net.fabricmc.loom.configuration.FabricApiExtension::class)
+                    .moduleVersion(moduleName, fabricVersion)
+            }"
+        )
+    }
+
+    fun DependencyHandlerScope.modOptionalImplementation(
+        dependencyNotation: Any,
+        configuration: Action<ModuleDependency>
+    ) {
+        configuration.execute(
+            this.add(
+                "modCompileOnly",
+                this.create(dependencyNotation)
+            ) as ModuleDependency
+        )
+        if (runtimeOptionalEnabled) configuration.execute(
+            this.add(
+                "modRuntime",
+                this.create(dependencyNotation)
+            ) as ModuleDependency
+        )
+    }
 
     repositories {
         mavenLocal()
@@ -96,12 +154,13 @@ subprojects {
 
     project.version = modVersion
 
-    configure<JavaPluginConvention> {
+    configure<JavaPluginExtension> {
         sourceCompatibility = JavaVersion.VERSION_16
         targetCompatibility = JavaVersion.VERSION_16
+        withSourcesJar()
     }
 
-    project.extensions.getByType(org.cadixdev.gradle.licenser.LicenseExtension::class).apply {
+    configure<org.cadixdev.gradle.licenser.LicenseExtension> {
         setHeader(rootProject.file("LICENSE_HEADER"))
         ext {
             set("company", "marcus8448")
@@ -109,61 +168,6 @@ subprojects {
         }
         include("**/io/github/marcus8448/**/*.java")
         include("build.gradle.kts")
-    }
-
-    fun minecraft(dependencyNotation: Any) {
-        project.dependencies.add("minecraft", project.dependencies.create(dependencyNotation))
-    }
-
-    fun mappings(dependencyNotation: Any) {
-        project.dependencies.add("mappings", project.dependencies.create(dependencyNotation))
-    }
-
-    fun modImplementation(dependencyNotation: Any) {
-        project.dependencies.add("modImplementation", project.dependencies.create(dependencyNotation))
-    }
-
-    fun modIncludedApi(dependencyNotation: Any, configuration: Action<ModuleDependency>) {
-        configuration.execute(
-            project.dependencies.add(
-                "modApi",
-                project.dependencies.create(dependencyNotation)
-            ) as ModuleDependency
-        )
-        configuration.execute(
-            project.dependencies.add(
-                "include",
-                project.dependencies.create(dependencyNotation)
-            ) as ModuleDependency
-        )
-    }
-
-    fun modRuntime(dependencyNotation: Any) {
-        project.dependencies.add("modRuntime", project.dependencies.create(dependencyNotation))
-    }
-
-    fun fabricApiImplementation(moduleName: String) {
-        modImplementation(
-            "net.fabricmc.fabric-api:$moduleName:${
-                project.extensions.getByType(net.fabricmc.loom.configuration.FabricApiExtension::class)
-                    .moduleVersion(moduleName, fabricVersion)
-            }"
-        )
-    }
-
-    fun modOptionalImplementation(dependencyNotation: Any, configuration: Action<ModuleDependency>) {
-        configuration.execute(
-            project.dependencies.add(
-                "modCompileOnly",
-                project.dependencies.create(dependencyNotation)
-            ) as ModuleDependency
-        )
-        if (runtimeOptionalEnabled) configuration.execute(
-            project.dependencies.add(
-                "modRuntime",
-                project.dependencies.create(dependencyNotation)
-            ) as ModuleDependency
-        )
     }
 
     dependencies {
@@ -200,7 +204,7 @@ subprojects {
             }
         }
 
-        if (modmenuEnabled) modOptionalImplementation("com.terraformersmc:modmenu:${modmenuVersion}") {
+        if (modmenuEnabled) this.modOptionalImplementation("com.terraformersmc:modmenu:${modmenuVersion}") {
             isTransitive = false
         }
         if (wthitEnabled) modOptionalImplementation("mcp.mobius.waila:wthit:fabric-${wthitVersion}") {
@@ -243,19 +247,13 @@ subprojects {
         }
     }
 
-    project.convention.getPluginByName<BasePluginConvention>("base").apply {
-        archivesBaseName = modName
-    }
+    project.extensions.getByName<BasePluginExtension>("base").archivesName.set(modName)
 
-    project.extensions.getByType(net.fabricmc.loom.LoomGradleExtension::class).apply {
+    configure<net.fabricmc.loom.LoomGradleExtension> {
         refmapName = "${modId}.refmap.json"
         if (project.file("src/main/resources/$modId.accesswidener").exists()) {
             accessWidener = project.file("src/main/resources/$modId.accesswidener")
         }
-    }
-
-    project.extensions.getByType(JavaPluginExtension::class).apply {
-        withSourcesJar()
     }
 
     project.tasks.withType(JavaCompile::class) {
@@ -304,7 +302,7 @@ subprojects {
                     if (modmenuEnabled) optionalDependency("modmenu")
                     if (wthitEnabled) optionalDependency("wthit")
                 })
-                mainArtifact(file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar"))
+                mainArtifact(file("${project.buildDir}/libs/${project.extensions.getByName<BasePluginExtension>("base").archivesName.get()}-${project.version}.jar"))
 
                 options(closureOf<com.matthewprenger.cursegradle.Options> {
                     forgeGradleIntegration = false
@@ -320,7 +318,7 @@ subprojects {
             projectId = modrinthId
             versionNumber = modVersion
             uploadFile =
-                file("${project.buildDir}/libs/${project.convention.getPluginByName<BasePluginConvention>("base").archivesBaseName}-${project.version}.jar")
+                file("${project.buildDir}/libs/${project.extensions.getByName<BasePluginExtension>("base").archivesName.get()}-${project.version}.jar")
             addGameVersion(minecraftVersion)
             addLoader("fabric")
         }
@@ -328,7 +326,7 @@ subprojects {
 }
 
 tasks.create("publishAll") {
-    rootProject.allprojects.forEach { project ->
+    project.allprojects.forEach { project ->
         project.tasks.forEach { task ->
             if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
                 this.dependsOn(":${project.name}:${task.name}")

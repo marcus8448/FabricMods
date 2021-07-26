@@ -41,7 +41,7 @@ public class OpenToLanScreenMixin {
         return builder.build(x, y, width, height, optionText, callback);
     }
 
-    @Dynamic
+    @Dynamic("Synthetic lambda 1.17")
     @Redirect(method = "method_19851", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/integrated/IntegratedServer;openToLan(Lnet/minecraft/world/GameMode;ZI)Z"))
     private boolean noCheatsForceGamemode(IntegratedServer server, @Nullable GameMode gameMode, boolean cheatsAllowed, int port) {
         return server.openToLan(server.getDefaultGameMode() != GameMode.CREATIVE ? server.getDefaultGameMode() : gameMode, server.getDefaultGameMode() == GameMode.CREATIVE && cheatsAllowed, port);
