@@ -1,21 +1,40 @@
-import java.time.Year
-import java.time.format.DateTimeFormatter
+/*
+ * Copyright (C) 2019-2021 marcus8448
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/.
+ */
 
 buildscript {
     repositories {
-        maven {
+        maven("https://maven.fabricmc.net/") {
             name = "Fabric"
-            setUrl("https://maven.fabricmc.net/")
             content {
                 includeGroup("net.fabricmc")
                 includeGroup("net.fabricmc.fabric-api")
                 includeGroup("fabric-loom")
             }
         }
+        maven("https://server.bbkr.space/artifactory/libs-release/") {
+            name = "Fabric"
+            content {
+                includeGroup("io.github.juuxel")
+            }
+        }
         gradlePluginPortal()
     }
     dependencies {
-        classpath("net.fabricmc:fabric-loom:0.8-SNAPSHOT")
+        classpath("net.fabricmc:fabric-loom:0.9-SNAPSHOT")
+        classpath("io.github.juuxel:loom-quiltflower-mini:1.0.0")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
         classpath("gradle.plugin.com.matthewprenger:CurseGradle:1.4.0")
         classpath("gradle.plugin.com.modrinth.minotaur:Minotaur:1.2.1")
@@ -41,6 +60,7 @@ subprojects {
     apply(plugin = "org.cadixdev.licenser")
     apply(plugin = "com.modrinth.minotaur")
     apply(plugin = "com.matthewprenger.cursegradle")
+    apply(plugin = "io.github.juuxel.loom-quiltflower-mini")
 
     val modId = project.property("mod.id").toString()
     val modName = project.property("mod.name").toString()
@@ -58,6 +78,8 @@ subprojects {
     val fabricModules = project.property("fabric.modules").toString().split(",".toRegex())
     val fabricRuntimeModules = project.property("fabric.runtime.modules").toString().split(",".toRegex())
     val runtimeOptionalEnabled = (project.property("optional_dependencies.enabled") ?: "false") == "true"
+
+    println("${modName}: ${modVersion}")
 
     fun DependencyHandlerScope.minecraft(dependencyNotation: Any) {
         this.add("minecraft", this.create(dependencyNotation))
@@ -86,7 +108,7 @@ subprojects {
         )
     }
 
-    fun DependencyHandlerScope.modRuntime(dependencyNotation: Any) {
+    fun DependencyHandlerScope.modRuntimeOnly(dependencyNotation: Any) {
         this.add("modRuntime", this.create(dependencyNotation))
     }
 
@@ -164,7 +186,7 @@ subprojects {
         setHeader(rootProject.file("LICENSE_HEADER"))
         ext {
             set("company", "marcus8448")
-            set("year", Year.now().value.toString())
+            set("year", java.time.Year.now().value.toString())
         }
         include("**/io/github/marcus8448/**/*.java")
         include("build.gradle.kts")
@@ -196,7 +218,7 @@ subprojects {
 
         if (fabricRuntimeModules[0].isNotEmpty()) {
             if (fabricRuntimeModules.size == 1 && fabricRuntimeModules[0] == "*") {
-                modRuntime("net.fabricmc.fabric-api:fabric-api:${fabricVersion}")
+                modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${fabricVersion}")
             } else {
                 fabricRuntimeModules.forEach {
                     fabricApiImplementation(it)
@@ -249,10 +271,10 @@ subprojects {
 
     project.extensions.getByName<BasePluginExtension>("base").archivesName.set(modName)
 
-    configure<net.fabricmc.loom.LoomGradleExtension> {
-        refmapName = "${modId}.refmap.json"
-        if (project.file("src/main/resources/$modId.accesswidener").exists()) {
-            accessWidener = project.file("src/main/resources/$modId.accesswidener")
+    configure<net.fabricmc.loom.api.LoomGradleExtensionAPI> {
+        mixin.defaultRefmapName.set("${modId}.refmap.json")
+        if (project.file("src/main/resources/${modId}.accesswidener").exists()) {
+            accessWidenerPath.set(project.file("src/main/resources/${modId}.accesswidener"))
         }
     }
 
@@ -271,7 +293,7 @@ subprojects {
                     "Implementation-Title" to modName,
                     "Implementation-Version" to project.version,
                     "Implementation-Vendor" to "marcus8448",
-                    "Implementation-Timestamp" to DateTimeFormatter.ISO_DATE_TIME,
+                    "Implementation-Timestamp" to java.time.format.DateTimeFormatter.ISO_DATE_TIME,
                     "Maven-Artifact" to "${rootProject.group}:${modName}:${project.version}"
                 )
             )

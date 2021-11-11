@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(LocateCommand.class)
 public abstract class LocateCommandMixin {
-    @Dynamic
+    @Dynamic("Synthetic lambda 1.17.1")
     @ModifyConstant(method = "method_13448", constant = @Constant(intValue = 2))
     private static int allowLocate(int in) {
         return 0;

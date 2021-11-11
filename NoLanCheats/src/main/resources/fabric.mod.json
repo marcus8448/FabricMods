@@ -33,7 +33,7 @@
   "accessWidener": "${mod_id}.accesswidener",
   "environment": "*",
   "depends": {
-    "fabricloader": "*",
+    "fabricloader": ">=0.12.0",
     "minecraft": "*"
   }
 }
