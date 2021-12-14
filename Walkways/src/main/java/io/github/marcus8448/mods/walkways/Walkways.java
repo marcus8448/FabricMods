@@ -29,8 +29,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class Walkways implements ModInitializer {
-    public static final Block WALKWAY = new WalkwayBlock(AbstractBlock.Settings.of(Material.STONE).strength(1.0f, 3.0f));
-    public static final Block MOVING_WALKWAY = new MovingWalkwayBlock(AbstractBlock.Settings.of(Material.STONE).strength(1.0f, 3.0f));
+    public static final Block WALKWAY = new WalkwayBlock(AbstractBlock.Settings.of(Material.STONE).nonOpaque().strength(1.0f, 3.0f));
+    public static final Block MOVING_WALKWAY = new MovingWalkwayBlock(AbstractBlock.Settings.of(Material.STONE).nonOpaque().strength(1.0f, 3.0f));
 
     @Override
     public void onInitialize() {

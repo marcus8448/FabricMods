@@ -33,8 +33,8 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("net.fabricmc:fabric-loom:0.9-SNAPSHOT")
-        classpath("io.github.juuxel:loom-quiltflower-mini:1.0.0")
+        classpath("net.fabricmc:fabric-loom:0.10-SNAPSHOT")
+        classpath("io.github.juuxel:loom-quiltflower-mini:1.2.0")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
         classpath("gradle.plugin.com.matthewprenger:CurseGradle:1.4.0")
         classpath("gradle.plugin.com.modrinth.minotaur:Minotaur:1.2.1")
@@ -109,7 +109,7 @@ subprojects {
     }
 
     fun DependencyHandlerScope.modRuntimeOnly(dependencyNotation: Any) {
-        this.add("modRuntime", this.create(dependencyNotation))
+        this.add("modRuntimeOnly", this.create(dependencyNotation))
     }
 
     fun DependencyHandlerScope.fabricApiImplementation(moduleName: String) {
@@ -133,7 +133,7 @@ subprojects {
         )
         if (runtimeOptionalEnabled) configuration.execute(
             this.add(
-                "modRuntime",
+                "modRuntimeOnly",
                 this.create(dependencyNotation)
             ) as ModuleDependency
         )
@@ -347,12 +347,12 @@ subprojects {
     }
 }
 
-tasks.create("publishAll") {
-    project.allprojects.forEach { project ->
-        project.tasks.forEach { task ->
-            if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
-                this.dependsOn(":${project.name}:${task.name}")
-            }
-        }
-    }
-}
+//tasks.create("publishAll") {
+//    rootProject.subprojects.forEach { project ->
+//        project.tasks.forEach { task ->
+//            if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
+//                this.dependsOn(":${project.name}:${task.name}")
+//            }
+//        }
+//    }
+//}

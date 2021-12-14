@@ -23,13 +23,14 @@ import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.GenerationStep;
-import net.minecraft.world.gen.feature.ConfiguredFeatures;
+import net.minecraft.world.gen.feature.MiscConfiguredFeatures;
+import net.minecraft.world.gen.feature.MiscPlacedFeatures;
 
 public class Snowy implements ModInitializer {
     public static final SnowyConfig CONFIG = new SnowyConfig();
     @Override
     public void onInitialize() {
-        BiomeModifications.create(new Identifier("snowy", "add_freeze_top")).add(ModificationPhase.ADDITIONS, biomeSelectionContext -> (CONFIG.data.nonOverworldBiomes || BiomeSelectors.foundInOverworld().test(biomeSelectionContext)) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getPrecipitation() != Biome.Precipitation.NONE) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getDownfall() > 0.0f) && !biomeSelectionContext.hasBuiltInFeature(ConfiguredFeatures.FREEZE_TOP_LAYER), context -> context.getGenerationSettings().addBuiltInFeature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, ConfiguredFeatures.FREEZE_TOP_LAYER));
+        BiomeModifications.create(new Identifier("snowy", "add_freeze_top")).add(ModificationPhase.ADDITIONS, biomeSelectionContext -> (CONFIG.data.nonOverworldBiomes || BiomeSelectors.foundInOverworld().test(biomeSelectionContext)) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getPrecipitation() != Biome.Precipitation.NONE) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getDownfall() > 0.0f) && !biomeSelectionContext.hasBuiltInFeature(MiscConfiguredFeatures.FREEZE_TOP_LAYER), context -> context.getGenerationSettings().addBuiltInFeature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, MiscPlacedFeatures.FREEZE_TOP_LAYER));
         BiomeModifications.create(new Identifier("snowy", "snow_in_overworld")).add(ModificationPhase.POST_PROCESSING, biomeSelectionContext -> (CONFIG.data.nonOverworldBiomes || BiomeSelectors.foundInOverworld().test(biomeSelectionContext)) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getPrecipitation() != Biome.Precipitation.NONE) && (CONFIG.data.dryBiomes || biomeSelectionContext.getBiome().getDownfall() > 0.0f), context -> {
             context.getWeather().setPrecipitation(Biome.Precipitation.SNOW);
             context.getWeather().setTemperature(0.0f);
