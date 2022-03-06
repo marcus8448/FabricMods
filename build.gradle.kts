@@ -33,11 +33,11 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath("net.fabricmc:fabric-loom:0.10-SNAPSHOT")
-        classpath("io.github.juuxel:loom-quiltflower-mini:1.2.0")
+        classpath("net.fabricmc:fabric-loom:0.11-SNAPSHOT")
+        classpath("io.github.juuxel:loom-quiltflower:1.6.0")
         classpath("gradle.plugin.org.cadixdev.gradle:licenser:0.6.1")
         classpath("gradle.plugin.com.matthewprenger:CurseGradle:1.4.0")
-        classpath("gradle.plugin.com.modrinth.minotaur:Minotaur:1.2.1")
+        classpath("com.modrinth.minotaur:Minotaur:2.0.2")
     }
 }
 
@@ -60,7 +60,7 @@ subprojects {
     apply(plugin = "org.cadixdev.licenser")
     apply(plugin = "com.modrinth.minotaur")
     apply(plugin = "com.matthewprenger.cursegradle")
-    apply(plugin = "io.github.juuxel.loom-quiltflower-mini")
+    apply(plugin = "io.github.juuxel.loom-quiltflower")
 
     val modId = project.property("mod.id").toString()
     val modName = project.property("mod.name").toString()
@@ -313,7 +313,7 @@ subprojects {
                 changelog = ""
 
                 addGameVersion("Fabric")
-                addGameVersion("Java 16")
+                addGameVersion("Java 17")
                 addGameVersion(minecraftVersion)
 
                 relations(closureOf<com.matthewprenger.cursegradle.CurseRelation> {
@@ -335,24 +335,30 @@ subprojects {
     }
 
     if (System.getenv("MODRINTH_API_KEY") != null && modrinthId.isNotBlank()) {
-        tasks.create<com.modrinth.minotaur.TaskModrinthUpload>("publishModrinth") {
-            token = System.getenv("MODRINTH_API_KEY")
-            projectId = modrinthId
-            versionNumber = modVersion
-            uploadFile =
-                file("${project.buildDir}/libs/${project.extensions.getByName<BasePluginExtension>("base").archivesName.get()}-${project.version}.jar")
-            addGameVersion(minecraftVersion)
-            addLoader("fabric")
+        extensions.getByType<com.modrinth.minotaur.ModrinthExtension>().apply {
+            token.set(System.getenv("MODRINTH_API_KEY"))
+            projectId.set(modrinthId)
+            versionNumber.set(modVersion)
+            uploadFile.set(file("${project.buildDir}/libs/${project.extensions.getByName<BasePluginExtension>("base").archivesName.get()}-${project.version}.jar"))
+            gameVersions.add(minecraftVersion)
+            loaders.add("fabric")
         }
     }
 }
 
-//tasks.create("publishAll") {
-//    rootProject.subprojects.forEach { project ->
-//        project.tasks.forEach { task ->
-//            if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
-//                this.dependsOn(":${project.name}:${task.name}")
-//            }
-//        }
-//    }
-//}
+tasks.create("_grabPublishTargets") {
+    this.doLast() {
+        val publishTask = tasks.get("publishAll")
+        rootProject.subprojects.forEach { project ->
+            project.tasks.forEach { task ->
+                if (task.name == "publishModrinth" || task.name.startsWith("curseforge")) {
+                    publishTask.dependsOn(task)
+                }
+            }
+        }
+    }
+}
+
+tasks.create("publishAll") {
+    this.dependsOn("_grabPublishTargets")
+}
